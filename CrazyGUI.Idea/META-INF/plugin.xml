@@ -1,0 +1,73 @@
+<idea-plugin version="2">
+  <id>com.octagon.crazygui.idea</id>
+  <name>CrazyGUI Idea Plugin</name>
+  <version>1.0</version>
+  <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
+
+  <description><![CDATA[
+      Enter short description for your plugin here.<br>
+      <em>most HTML tags may be used</em>
+    ]]></description>
+
+  <change-notes><![CDATA[
+      Add change notes here.<br>
+      <em>most HTML tags may be used</em>
+    ]]>
+  </change-notes>
+
+  <!-- please see https://confluence.jetbrains.com/display/IDEADEV/Build+Number+Ranges for description -->
+  <idea-version since-build="131"/>
+
+  <!-- please see https://confluence.jetbrains.com/display/IDEADEV/Plugin+Compatibility+with+IntelliJ+Platform+Products
+       on how to target different products -->
+  <!-- uncomment to enable plugin in all products
+  <depends>com.intellij.modules.lang</depends>
+  -->
+
+  <extensions defaultExtensionNs="com.intellij">
+    <!-- Add your extensions here -->
+    <fileTypeFactory implementation="com.octagon.crazygui.idea.CXMLFileTypeFactory"/>
+    <lang.parserDefinition language="CXML" implementationClass="com.octagon.crazygui.idea.CXMLParserDefinition"/>
+    <colorSettingsPage implementation="com.octagon.crazygui.idea.CXMLColorSettingsPage"/>
+    <lang.syntaxHighlighterFactory key="CXML" implementationClass="com.octagon.crazygui.idea.CXMLSyntaxHighlighterFactory"/>
+    <annotator language="CXML" implementationClass="com.octagon.crazygui.idea.CXMLAnnotator"/>
+    <completion.contributor language="CXML" implementationClass="com.octagon.crazygui.idea.CXMLTagNameCompletion"/>
+    <completion.contributor language="CXML" implementationClass="com.octagon.crazygui.idea.CXMLAttributeNameCompletion" />
+    <completion.contributor language="CXML" implementationClass="com.octagon.crazygui.idea.CXMLResourceLocationCompletion" />
+    <lang.psiStructureViewFactory language="CXML" implementationClass="com.octagon.crazygui.idea.CXMLStructureViewFactory"/>
+  </extensions>
+
+  <application-components>
+    <!-- Add your application components here -->
+    <component>
+      <implementation-class>com.octagon.crazygui.idea.CXMLEditorProvider</implementation-class>
+    </component>
+  </application-components>
+
+  <project-components>
+    <!-- Add your project components here -->
+    <component>
+      <implementation-class>com.octagon.crazygui.idea.MainComponent</implementation-class>
+    </component>
+  </project-components>
+
+  <actions>
+    <!-- Add your actions here -->
+    <action id="crazygui.CompilerOptions" class="com.octagon.crazygui.idea.actions.CompilerOptionsAction" text="CrazyGUI compiler settings"
+            description="Opens the configuration dialogue for the CrazyGUI compiler">
+      <add-to-group group-id="ToolsMenu" anchor="last"/>
+    </action>
+    <action id="crazygui.ForceCompileAction" class="com.octagon.crazygui.idea.actions.ForceCompileAction"
+            text="Compile this GUI file" description="Forces CrazyGUI to recompile this file">
+      <add-to-group group-id="ToolsMenu" anchor="before" relative-to-action="com.intellij.tools.ExternalToolsGroup"/>
+      <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+      <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
+      <keyboard-shortcut keymap="$default" first-keystroke="shift ctrl alt R"/>
+    </action>
+    <action id="crazygui.CreateGuiFileAction" class="com.octagon.crazygui.idea.actions.CreateGuiFileAction" text="CXML Gui"
+            description="Create a barebones CXML gui">
+      <add-to-group group-id="NewGroup" anchor="last"/>
+    </action>
+  </actions>
+
+</idea-plugin>

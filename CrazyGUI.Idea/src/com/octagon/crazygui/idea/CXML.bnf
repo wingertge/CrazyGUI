@@ -1,0 +1,54 @@
+{
+  parserClass="com.octagon.crazygui.idea.parser.CXMLParser"
+
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+  psiClassPrefix="CXML"
+  psiImplClassSuffix="Impl"
+  psiPackage="com.octagon.crazygui.idea.psi"
+  psiImplPackage="com.octagon.crazygui.idea.psi.impl"
+
+  elementTypeHolderClass="com.octagon.crazygui.idea.psi.CXMLTypes"
+  elementTypeClass="com.octagon.crazygui.idea.psi.CXMLElementType"
+  tokenTypeClass="com.octagon.crazygui.idea.psi.CXMLTokenType"
+  psiImplUtilClass="com.octagon.crazygui.idea.psi.impl.CXMLPsiImplUtil"
+
+  tokens=[
+    root = "regexp:[rR][oO][oO][tT]"
+    stringvalue = "regexp:\"[a-zA-Z0-9\.\(\)\s]*\""
+    intvalue = "regexp:[0-9]+"
+    codevalue = "regexp:\"\{[a-zA-Z0-9\.\(\)]*\}\""
+    identifier = "regexp:([a-zA-Z]+:)?[a-zA-Z][a-zA-Z0-9]*"
+    crlf = "\n|\r|\r\n"
+    white_space = "regexp:\s+"
+    separator = "="
+    greater_than = ">"
+    less_than = "<"
+    close_tag = "/>"
+    open_closing_tag = "</"
+    open_comment = "<!--"
+    close_comment = "-->"
+  ]
+
+  extends("tag") = "com.octagon.crazygui.idea.psi.impl.CXMLTagUtilImpl"
+  extends("rootTag") = "com.octagon.crazygui.idea.psi.impl.CXMLRootTagUtilImpl"
+  extends("selfContainedTag") = "com.octagon.crazygui.idea.psi.impl.CXMLTagBaseUtilImpl"
+  extends("attribute") = "com.octagon.crazygui.idea.psi.impl.CXMLNamedElementImpl"
+  implements("tag") = "com.octagon.crazygui.idea.psi.CXMLTagBase"
+  implements("selfContainedTag") = "com.octagon.crazygui.idea.psi.CXMLTagBase"
+  implements("rootTag") = "com.octagon.crazygui.idea.psi.CXMLTagBase"
+  implements("attribute") = "com.octagon.crazygui.idea.psi.CXMLNamedElement"
+}
+
+cxmlFile ::= rootTag
+
+private item_ ::= tag_ | CRLF | WHITE_SPACE | comment
+private tag_ ::= selfContainedTag | tag
+selfContainedTag ::= LESS_THAN WHITE_SPACE? tagName attribute* WHITE_SPACE? CLOSE_TAG | LESS_THAN WHITE_SPACE? tagName WHITE_SPACE? attribute* | (LESS_THAN WHITE_SPACE?) {methods=[getName setName getNameIdentifier]}
+tag ::= (LESS_THAN WHITE_SPACE? tagName attribute* GREATER_THAN item_* (OPEN_CLOSING_TAG tagName GREATER_THAN | OPEN_CLOSING_TAG tagName | OPEN_CLOSING_TAG | LESS_THAN)) {methods=[getName setName getNameIdentifier]}
+attribute ::= (IDENTIFIER WHITE_SPACE? SEPARATOR WHITE_SPACE? value) | IDENTIFIER WHITE_SPACE? SEPARATOR WHITE_SPACE? | IDENTIFIER {methods=[getName setName getNameIdentifier getAttributeName]}
+value ::= stringValue | INTVALUE
+stringValue ::= STRINGVALUE | CODEVALUE
+comment ::= OPEN_COMMENT CLOSE_COMMENT
+tagName ::= IDENTIFIER
+rootTag ::= LESS_THAN ROOT attribute* GREATER_THAN item_* OPEN_CLOSING_TAG ROOT GREATER_THAN {methods=[getName setName getNameIdentifier]}

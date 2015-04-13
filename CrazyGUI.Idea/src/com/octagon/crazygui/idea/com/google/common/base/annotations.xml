@@ -1,0 +1,12 @@
+<root>
+    <item name='com.google.common.base.Preconditions T checkNotNull(T)'>
+        <annotation name='org.jetbrains.annotations.Contract'>
+            <val val="&quot;null -&gt; fail&quot;"/>
+        </annotation>
+    </item>
+    <item name='com.google.common.base.Preconditions void checkArgument(boolean)'>
+      <annotation name='org.jetbrains.annotations.Contract'>
+        <val val="&quot;false -&gt; fail&quot;"/>
+      </annotation>
+    </item>
+</root>
