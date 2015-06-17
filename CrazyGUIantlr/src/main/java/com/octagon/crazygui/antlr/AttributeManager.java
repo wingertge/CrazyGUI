@@ -1,7 +1,8 @@
 package com.octagon.crazygui.antlr;
 
+import com.intellij.navigation.ItemPresentation;
 import com.intellij.openapi.ui.ComboBox;
-import com.octagon.crazygui.antlr.util.LogHelper;
+import com.intellij.openapi.util.IconLoader;
 
 import javax.swing.*;
 import javax.swing.table.TableCellEditor;
@@ -124,7 +125,9 @@ public class AttributeManager {
         }
     }
 
-    public abstract static class PrimitiveParser<T> implements ICXMLSerializable<T>, IGuiEditorProvider {
+    public abstract static class PrimitiveParser<T> implements ICXMLSerializable<T>, IGuiEditorProvider, ICustomPresentation {
+        private static final Icon numericIcon = IconLoader.getIcon("/com/octagon/crazygui/idea/icons/numericValueIcon.png");
+
         @Override
         public String serialize(T value) {
             return value.toString();
@@ -147,6 +150,11 @@ public class AttributeManager {
                 listener.updateValue(deserialize(((JTextField) a.getSource()).getText()));
                 editor.stopCellEditing();
             });
+        }
+
+        @Override
+        public ItemPresentation getPresentation(String name) {
+            return new CXMLItemPresentation(name, numericIcon);
         }
     }
 
@@ -183,6 +191,7 @@ public class AttributeManager {
     }
 
     public static class BooleanParser extends PrimitiveParser<Boolean> {
+        private static final Icon booleanIcon = IconLoader.getIcon("/com/octagon/crazygui/idea/icons/booleanValueIcon.png");
 
         @Override
         public Boolean deserialize(String string) {
@@ -191,8 +200,6 @@ public class AttributeManager {
 
         @Override
         public JComponent getSwingEditor(ComponentAttribute attribute) {
-            if(!(attribute.getValue() instanceof Boolean))
-                LogHelper.info("asd");
             return new JCheckBox("", (Boolean) attribute.getValue());
         }
 
@@ -208,6 +215,11 @@ public class AttributeManager {
                 listener.updateValue(checkBox.isSelected());
                 editor.stopCellEditing();
             });
+        }
+
+        @Override
+        public ItemPresentation getPresentation(String name) {
+            return new CXMLItemPresentation(name, booleanIcon);
         }
     }
 

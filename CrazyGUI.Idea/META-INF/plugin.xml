@@ -35,6 +35,7 @@
     <completion.contributor language="CXML" implementationClass="com.octagon.crazygui.idea.CXMLAttributeNameCompletion" />
     <completion.contributor language="CXML" implementationClass="com.octagon.crazygui.idea.CXMLResourceLocationCompletion" />
     <lang.psiStructureViewFactory language="CXML" implementationClass="com.octagon.crazygui.idea.CXMLStructureViewFactory"/>
+    <lang.formatter language="CXML" implementationClass="com.octagon.crazygui.idea.CXMLFormattingModelBuilder"/>
   </extensions>
 
   <application-components>

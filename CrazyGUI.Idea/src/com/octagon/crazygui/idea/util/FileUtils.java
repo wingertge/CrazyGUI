@@ -3,8 +3,9 @@ package com.octagon.crazygui.idea.util;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiFile;
+import scala.reflect.io.VirtualDirectory;
 
-public class PsiFiles {
+public class FileUtils {
     public static boolean isPsiFilePhysicallyInProject(Project project, PsiFile psiFile) {
         return isPsiFilePhysicallyInProject(project, psiFile.getParent());
     }

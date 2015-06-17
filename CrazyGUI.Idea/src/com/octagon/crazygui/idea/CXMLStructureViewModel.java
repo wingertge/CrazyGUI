@@ -6,6 +6,7 @@ import com.intellij.ide.structureView.StructureViewTreeElement;
 import com.intellij.ide.util.treeView.smartTree.Sorter;
 import com.intellij.psi.PsiFile;
 import com.octagon.crazygui.idea.psi.CXMLAttribute;
+import com.octagon.crazygui.idea.psi.CXMLFile;
 import com.octagon.crazygui.idea.psi.CXMLTagBase;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,7 +23,7 @@ public class CXMLStructureViewModel extends StructureViewModelBase implements St
 
     @Override
     public boolean isAlwaysShowsPlus(StructureViewTreeElement element) {
-        return element instanceof CXMLTagBase;
+        return element instanceof CXMLTagBase || element instanceof CXMLFile;
     }
 
     @Override

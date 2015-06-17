@@ -178,9 +178,9 @@ public class GuiVisitor extends CrazyGUIBaseVisitor<String> {
             guiClass +=
                     "import net.minecraft.inventory.IInventory;\n" +
                     "import net.minecraft.inventory.Slot;\n" +
-                    "import com.octagon.crazygui.*\n" +
-                    "import com.octagon.crazygui.components.*\n" +
-                    "import com.octagon.crazygui.slots.*\n" +
+                    "import com.octagon.crazygui.*;\n" +
+                    "import com.octagon.crazygui.components.*;\n" +
+                    "import com.octagon.crazygui.slots.*;\n" +
                     "import " + guiPackage + ".*;\n" +
                     "import " + guiSlotsPackage + ".*;\n" +
                     "import " + componentPackage + ".*;\n" +

@@ -18,10 +18,10 @@ public class CXMLElementFactory {
 
     public static CXMLTag createTag(Project project, String tagName, List<ComponentAttribute> attributes) {
         String fileContent = String.format("<Root><%s %s></%s></Root>", tagName,
-                attributes.stream().map(a -> String.format("%s=%s", a.getName(), getValueString(a.getValueString(), a.getParser()))).reduce((a, b) -> a + " " + b),
+                attributes.stream().map(a -> String.format("%s=%s", a.getName(), getValueString(a.getValueString(), a.getParser()))).reduce((a, b) -> a + " " + b).orElse(""),
                 tagName);
         final CXMLFile file = createFile(project, fileContent);
-        return ((CXMLRootTag)file.getFirstChild()).getTagList().get(0);
+        return file.findChildByClass(CXMLRootTag.class).getTagList().get(0);
     }
 
     public static CXMLSelfContainedTag createSelfContainedTag(Project project, String tagName, List<ComponentAttribute> attributes) {

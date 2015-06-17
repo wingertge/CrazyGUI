@@ -6,6 +6,7 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.octagon.crazygui.antlr.AttributeManager;
 import com.octagon.crazygui.antlr.ICXMLSerializable;
 import com.octagon.crazygui.antlr.ComponentAttribute;
+import com.octagon.crazygui.antlr.util.LogHelper;
 import com.octagon.crazygui.idea.actions.ConfigCompilerDialogue;
 import org.apache.commons.lang.ArrayUtils;
 
@@ -73,6 +74,7 @@ public class ClassUtils {
                             break;
                         }
                     }
+                    if(defaultValue == null || defaultValue.equals("")) defaultValue = DefaultUtils.getDefaultValue(parameterType);
                     attributeNames.add(new ComponentAttribute(defaultValue, parser, attributeName));
                 }
             }

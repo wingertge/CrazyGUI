@@ -1,10 +1,16 @@
 package com.octagon.crazygui.idea;
 
+import com.intellij.codeInsight.actions.ReformatCodeProcessor;
+import com.intellij.openapi.application.Application;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileManager;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiManager;
 import com.octagon.crazygui.antlr.CodeGenerator;
 import com.octagon.crazygui.idea.actions.ConfigCompilerDialogue;
 import org.jetbrains.annotations.NotNull;
@@ -43,6 +49,14 @@ public class RunCompilerOnXMLFile extends Task.Modal {
         if ( forceGeneration || (autoGen && isXMLStale()) ) {
             compile(xmlFile);
         }
+    }
+
+    private void format(VirtualFile file) {
+        ApplicationManager.getApplication().runReadAction(() -> {
+            PsiFile psiFile = PsiManager.getInstance(project).findFile(file);
+            ReformatCodeProcessor formattingProcessor = new ReformatCodeProcessor(project, psiFile, null, false);
+            formattingProcessor.run();
+        });
     }
 
     public boolean isXMLStale() {
@@ -98,6 +112,7 @@ public class RunCompilerOnXMLFile extends Task.Modal {
             vPath = vPath.substring(project.getBaseDir().getPath().length());
             VirtualFile file = project.getBaseDir().findFileByRelativePath(vPath.replace('\\', '/'));
             if(file != null) {
+                format(file);
                 file.refresh(true, false);
             }
         } catch (IOException e) {

@@ -44,11 +44,11 @@ cxmlFile ::= rootTag
 
 private item_ ::= tag_ | CRLF | WHITE_SPACE | comment
 private tag_ ::= selfContainedTag | tag
-selfContainedTag ::= LESS_THAN WHITE_SPACE? tagName attribute* WHITE_SPACE? CLOSE_TAG | LESS_THAN WHITE_SPACE? tagName WHITE_SPACE? attribute* | (LESS_THAN WHITE_SPACE?) {methods=[getName setName getNameIdentifier]}
-tag ::= (LESS_THAN WHITE_SPACE? tagName attribute* GREATER_THAN item_* (OPEN_CLOSING_TAG tagName GREATER_THAN | OPEN_CLOSING_TAG tagName | OPEN_CLOSING_TAG | LESS_THAN)) {methods=[getName setName getNameIdentifier]}
-attribute ::= (IDENTIFIER WHITE_SPACE? SEPARATOR WHITE_SPACE? value) | IDENTIFIER WHITE_SPACE? SEPARATOR WHITE_SPACE? | IDENTIFIER {methods=[getName setName getNameIdentifier getAttributeName]}
+selfContainedTag ::= LESS_THAN WHITE_SPACE? tagName attribute* WHITE_SPACE? CLOSE_TAG | LESS_THAN WHITE_SPACE? tagName WHITE_SPACE? attribute* | (LESS_THAN WHITE_SPACE?) {methods=[getName setName getNameIdentifier getPresentation navigate canNavigate canNavigateToSource navigate]}
+tag ::= (LESS_THAN WHITE_SPACE? tagName attribute* GREATER_THAN item_* (OPEN_CLOSING_TAG tagName GREATER_THAN | OPEN_CLOSING_TAG tagName | OPEN_CLOSING_TAG | LESS_THAN)) {methods=[getName setName getNameIdentifier getPresentation canNavigate canNavigateToSource navigate]}
+attribute ::= (IDENTIFIER WHITE_SPACE? SEPARATOR WHITE_SPACE? value) | IDENTIFIER WHITE_SPACE? SEPARATOR WHITE_SPACE? | IDENTIFIER {methods=[getName setName getNameIdentifier getAttributeName getPresentation canNavigate canNavigateToSource navigate]}
 value ::= stringValue | INTVALUE
 stringValue ::= STRINGVALUE | CODEVALUE
 comment ::= OPEN_COMMENT CLOSE_COMMENT
 tagName ::= IDENTIFIER
-rootTag ::= LESS_THAN ROOT attribute* GREATER_THAN item_* OPEN_CLOSING_TAG ROOT GREATER_THAN {methods=[getName setName getNameIdentifier]}
+rootTag ::= LESS_THAN ROOT attribute* GREATER_THAN item_* OPEN_CLOSING_TAG ROOT GREATER_THAN {methods=[getName setName getNameIdentifier getPresentation canNavigate canNavigateToSource navigate]}

@@ -55,6 +55,7 @@ public class ForceCompileAction extends AnAction {
             // if everything already saved (!stale) then run ANTLR
             // if had to be saved and autogen NOT on, then run ANTLR
             // Otherwise, the save file event will have or will run ANTLR.
+
             ProgressManager.getInstance().run(gen); //, "Generating", canBeCancelled, e.getData(PlatformDataKeys.PROJECT));
 
             // refresh from disk to see new files

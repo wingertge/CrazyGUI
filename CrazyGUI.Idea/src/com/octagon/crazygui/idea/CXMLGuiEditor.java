@@ -21,10 +21,7 @@ import com.octagon.crazygui.CrazyGUIAttributeManager;
 import com.octagon.crazygui.antlr.ComponentAttribute;
 import com.octagon.crazygui.antlr.util.LogHelper;
 import com.octagon.crazygui.idea.actions.ConfigCompilerDialogue;
-import com.octagon.crazygui.idea.psi.CXMLFile;
-import com.octagon.crazygui.idea.psi.CXMLTag;
-import com.octagon.crazygui.idea.psi.CXMLTagBase;
-import com.octagon.crazygui.idea.psi.CXMLTagName;
+import com.octagon.crazygui.idea.psi.*;
 import com.octagon.crazygui.idea.util.ClassUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -41,6 +38,7 @@ import java.util.stream.Collectors;
 
 public class CXMLGuiEditor extends UserDataHolderBase implements FileEditor {
     private final VirtualFile file;
+    private final Project project;
     private JPanel left;
     private JTree componentTree;
     private JTable attributes;
@@ -52,9 +50,10 @@ public class CXMLGuiEditor extends UserDataHolderBase implements FileEditor {
     private CXMLFile psiDocument;
     private CXMLTagBase selectedTag = null;
 
-    boolean[] slotIds = new boolean[128];
+    CXMLTagBase[] slotIds = new CXMLTagBase[128];
 
     public CXMLGuiEditor(Project project, VirtualFile file) {
+        this.project = project;
         CrazyGUIAttributeManager.init();
         this.file = file;
         PsiFile psi = PsiManager.getInstance(project).findFile(file);
@@ -86,27 +85,33 @@ public class CXMLGuiEditor extends UserDataHolderBase implements FileEditor {
     public void setSelectedTag(@NotNull Project project, @Nullable CXMLTagBase tag) {
         this.selectedTag = tag;
         if(tag == null) {
-            this.attributes.setModel(new TagAttributes(null, new HashMap<>()));
+            this.attributes.setModel(new TagAttributes(psiDocument, null, new HashMap<>()));
         } else {
             Map<String, List<ComponentAttribute>> attributes = ClassUtils.getComponentAttributeNames(project);
             if(!attributes.containsKey(selectedTag.getTagName() != null ? selectedTag.getTagName().getText() : "Root")) return;
             List<ComponentAttribute> tagAttributes = attributes.get(selectedTag.getTagName().getText());
             Map<String, String> definedAttributes = selectedTag.getAttributeList().stream().filter(a -> a.getValue() != null).collect(Collectors.toMap(a -> a.getFirstChild().getText(), a -> a.getValue().getText()));
             if(selectedTag.getTagName().getText().equalsIgnoreCase("slot")) {
-                int slotId = 0;
-                while(slotIds[slotId]) {
+                int slotId = definedAttributes.containsKey("id") ? Integer.parseInt(definedAttributes.get("id")) : 0;
+                boolean dirty = false;
+                while(slotIds[slotId] != null && !slotIds[slotId].equals(selectedTag)) {
                     slotId++;
+                    dirty = true;
                 }
                 final int finalSlotId = slotId;
-                tagAttributes.stream().filter(a -> a.getName().equals("id")).forEach(a -> a.setValue(finalSlotId));
-                slotIds[finalSlotId] = true;
+                final boolean finalDirty = dirty;
+                tagAttributes.stream().filter(a -> a.getName().equals("id")).forEach(a -> {
+                    a.setValue(finalSlotId);
+                    if(finalDirty) a.markDirty();
+                });
+                slotIds[finalSlotId] = selectedTag;
             }
             for(ComponentAttribute attribute : tagAttributes) {
                 if(attribute.getName().equals("id")) continue;
                 if(definedAttributes.containsKey(attribute.getName()))
                     attribute.setValueString(definedAttributes.get(attribute.getName()));
             }
-            this.attributes.setModel(new TagAttributes(tag, tagAttributes.stream().collect(Collectors.toMap(ComponentAttribute::getName, a -> a))));
+            this.attributes.setModel(new TagAttributes(psiDocument, tag, tagAttributes.stream().collect(Collectors.toMap(ComponentAttribute::getName, a -> a))));
         }
     }
 
@@ -135,6 +140,11 @@ public class CXMLGuiEditor extends UserDataHolderBase implements FileEditor {
         componentTree.setDragEnabled(true);
         componentTree.setDropMode(DropMode.ON_OR_INSERT);
         componentTree.setTransferHandler(new ComponentTreeTransferHandler());
+
+        palette.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+
+        palette.setDragEnabled(true);
+        palette.setTransferHandler(new PaletteTransferHandler());
     }
 
     @Nullable
@@ -224,6 +234,10 @@ public class CXMLGuiEditor extends UserDataHolderBase implements FileEditor {
 
     }
 
+    public void navigateToElement(CXMLNamedElement element) {
+
+    }
+
     private void recreateFileStructure() {
         CXMLMutableTreeNode root = new CXMLMutableTreeNode("Root", psiDocument.getFirstChild());
         walkTree(psiDocument.getFirstChild(), root);
@@ -248,8 +262,10 @@ public class CXMLGuiEditor extends UserDataHolderBase implements FileEditor {
         Map<String, String> vendorComponentList = ClassUtils.getComponentList(project, "com.octagon.crazygui.components");
         Map<String, String> userComponentList = ClassUtils.getComponentList(project, ConfigCompilerDialogue.getProp(project, ConfigCompilerDialogue.PROP_GUI_PACKAGE, "com.octagon.airships.gui") + ".components");
 
-        for(Map.Entry<String, String> entry : vendorComponentList.entrySet()) vendorComponents.add(new CXMLMutableTreeNode(entry.getKey(), entry.getValue()));
-        for(Map.Entry<String, String> entry : userComponentList.entrySet()) userComponents.add(new CXMLMutableTreeNode(entry.getKey(), entry.getValue()));
+        for (Map.Entry<String, String> entry : vendorComponentList.entrySet())
+            vendorComponents.add(new CXMLMutableTreeNode(entry.getKey(), entry.getValue()));
+        for (Map.Entry<String, String> entry : userComponentList.entrySet())
+            userComponents.add(new CXMLMutableTreeNode(entry.getKey(), entry.getValue()));
 
         vendorComponents.add(new CXMLMutableTreeNode("Slot", "com.octagon.crazygui.editor.EditorSlot"));
         vendorComponents.add(new CXMLMutableTreeNode("PlayerInventory", "com.octagon.crazygui.editor.EditorPlayerInventory"));
@@ -257,6 +273,11 @@ public class CXMLGuiEditor extends UserDataHolderBase implements FileEditor {
         root.add(vendorComponents);
         root.add(userComponents);
         palette.setModel(new PaletteTreeModel(root));
+    }
+
+    public void reload() {
+        recreateFileStructure();
+        recreatePalette(project);
     }
 
     private void moveTagTo(CXMLTagBase tagToMove, int insertAt) {
@@ -469,7 +490,7 @@ public class CXMLGuiEditor extends UserDataHolderBase implements FileEditor {
             try {
                 String mimeType = DataFlavor.javaJVMLocalObjectMimeType +
                         ";class=\"" +
-                        com.octagon.crazygui.idea.CXMLMutableTreeNode[].class.getName() +
+                        javax.swing.tree.DefaultMutableTreeNode[].class.getName() +
                         "\"";
                 nodesFlavor = new DataFlavor(mimeType);
                 flavors[0] = nodesFlavor;

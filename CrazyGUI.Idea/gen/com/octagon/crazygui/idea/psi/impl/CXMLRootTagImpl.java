@@ -9,6 +9,7 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static com.octagon.crazygui.idea.psi.CXMLTypes.*;
 import com.octagon.crazygui.idea.psi.*;
+import com.intellij.navigation.ItemPresentation;
 
 public class CXMLRootTagImpl extends CXMLRootTagUtilImpl implements CXMLRootTag {
 
@@ -55,6 +56,23 @@ public class CXMLRootTagImpl extends CXMLRootTagUtilImpl implements CXMLRootTag 
 
   public PsiElement getNameIdentifier() {
     return CXMLPsiImplUtil.getNameIdentifier(this);
+  }
+
+  @Nullable
+  public ItemPresentation getPresentation() {
+    return CXMLPsiImplUtil.getPresentation(this);
+  }
+
+  public boolean canNavigate() {
+    return CXMLPsiImplUtil.canNavigate(this);
+  }
+
+  public boolean canNavigateToSource() {
+    return CXMLPsiImplUtil.canNavigateToSource(this);
+  }
+
+  public void navigate(boolean b) {
+    CXMLPsiImplUtil.navigate(this, b);
   }
 
 }

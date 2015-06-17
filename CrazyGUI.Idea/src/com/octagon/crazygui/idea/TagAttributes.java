@@ -11,6 +11,7 @@ import com.octagon.crazygui.antlr.AttributeManager;
 import com.octagon.crazygui.antlr.ComponentAttribute;
 import com.octagon.crazygui.antlr.util.LogHelper;
 import com.octagon.crazygui.idea.psi.CXMLAttribute;
+import com.octagon.crazygui.idea.psi.CXMLFile;
 import com.octagon.crazygui.idea.psi.CXMLTagBase;
 
 import javax.swing.table.AbstractTableModel;
@@ -20,11 +21,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class TagAttributes extends AbstractTableModel {
+    private CXMLFile file;
     private CXMLTagBase tag;
     public Map<String, ComponentAttribute> attributes;
     public Map<Integer, String> keyMap;
 
-    public TagAttributes(CXMLTagBase tag, Map<String, ComponentAttribute> attributes) {
+    public TagAttributes(CXMLFile file, CXMLTagBase tag, Map<String, ComponentAttribute> attributes) {
+        this.file = file;
         this.tag = tag;
         this.attributes = attributes;
         keyMap = new HashMap<>();
@@ -33,6 +36,7 @@ public class TagAttributes extends AbstractTableModel {
             keyMap.put(i[0], a.getKey());
             i[0]++;
         });
+        updateAttributes();
     }
 
     public void setAttribute(String name, ComponentAttribute value) {
@@ -101,7 +105,7 @@ public class TagAttributes extends AbstractTableModel {
         Document document = null;
         Project project = null;
         for(Project p : ProjectManager.getInstance().getOpenProjects()) {
-            Document d = PsiDocumentManager.getInstance(p).getDocument(tag.getContainingFile());
+            Document d = PsiDocumentManager.getInstance(p).getDocument(file);
             if(d != null) {
                 document = d;
                 project = p;
@@ -113,10 +117,10 @@ public class TagAttributes extends AbstractTableModel {
         for(ComponentAttribute a : changed) {
             boolean matched = false;
             for(CXMLAttribute ignored : tag.getAttributeList().stream().filter(b -> b.getName().equals(a.getName())).collect(Collectors.toList())) {
-                if (tagText[0].matches("(.*)" + a.getName() + "(\\s+)?(=)?(\\s+)?(([0-9]+)|(\"[a-zA-Z0-9\\.\\(\\)\\s]*\")|(\"\\{[a-zA-Z0-9\\.\\(\\)]*\\}\"))?(.*)")) {
-                    tagText[0] = tagText[0].replaceFirst(a.getName() + "(\\s+)?(=)?(\\s+)?(([0-9]+)|(\"[a-zA-Z0-9\\.\\(\\)\\s]*\")|(\"\\{[a-zA-Z0-9\\.\\(\\)]*\\}\"))?",
+                if (tagText[0].matches("(.*)(\\s)+" + a.getName() + "(\\s+)?(=)?(\\s+)?(([0-9]+)|(\"[a-zA-Z0-9\\.\\(\\)\\s]*\")|(\"\\{[a-zA-Z0-9\\.\\(\\)]*\\}\"))?(.*)")) {
+                    tagText[0] = tagText[0].replaceFirst("(\\s)+" + a.getName() + "(\\s+)?(=)?(\\s+)?(([0-9]+)|(\"[a-zA-Z0-9\\.\\(\\)\\s]*\")|(\"\\{[a-zA-Z0-9\\.\\(\\)]*\\}\"))?",
                             a.getParser() instanceof AttributeManager.PrimitiveParser && !(a.getParser() instanceof AttributeManager.BooleanParser) ?
-                                    a.getName() + "=" + a.getValueString() : a.getName() + "=\"" + a.getValueString() + "\"");
+                                    " " + a.getName() + "=" + a.getValueString() : " " + a.getName() + "=\"" + a.getValueString() + "\"");
                     matched = true;
                     break;
                 }
@@ -135,7 +139,7 @@ public class TagAttributes extends AbstractTableModel {
             attributes.values().stream().filter(b -> b.getName().equals(a.getName())).forEach(ComponentAttribute::markClean);
         }
 
-        ReadonlyStatusHandler.getInstance(project).ensureFilesWritable(tag.getContainingFile().getVirtualFile());
+        ReadonlyStatusHandler.getInstance(project).ensureFilesWritable(file.getVirtualFile());
         final Document finalDocument = document;
         final Project finalProject = project;
         ApplicationManager.getApplication().runWriteAction(() -> {

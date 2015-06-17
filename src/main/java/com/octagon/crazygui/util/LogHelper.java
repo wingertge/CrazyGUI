@@ -20,5 +20,5 @@ public class LogHelper {
 
     public static void trace(Object o) { log(Level.TRACE, o); }
 
-    public static void warn(Object o) { log(Level.WARN, o); }
+    public static void warn(Object o, Object... params) { log(Level.WARN, String.format(o.toString(), params)); }
 }
